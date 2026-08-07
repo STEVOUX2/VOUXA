@@ -357,7 +357,7 @@ export function TvDetailClient({ idParam, currentUserId, initialServers = [], wa
         .player-header { padding: 16px !important; flex-wrap: wrap !important; gap: 12px 0 !important; flex-direction: row !important; background: rgba(8,8,8,0.65) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
         .player-header-center { position: static !important; transform: none !important; width: 100% !important; margin-top: 4px !important; order: 3; }
         .player-header-left { flex: 1; min-width: 0; }
-        .player-header-close { order: 2; margin-left: 12px; }
+        .player-header-close { order: 2; margin-left: auto !important; }
         .episode-controls { flex-wrap: wrap !important; }
         .episode-search { width: 100% !important; }
       }
@@ -499,6 +499,7 @@ export function TvDetailClient({ idParam, currentUserId, initialServers = [], wa
               
               <button 
                 onClick={() => setWatchEpisode(null)}
+                className="player-header-close"
                 style={{
                   width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)',
                   border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
