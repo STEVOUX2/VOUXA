@@ -361,7 +361,7 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
         .detail-back-btn, .detail-mute-btn { top: 24px !important; }
         .detail-back-btn { left: 16px !important; }
         .detail-mute-btn { right: 16px !important; }
-        .player-header { padding: 12px 16px !important; flex-wrap: wrap !important; gap: 12px 0 !important; flex-direction: row !important; background: rgba(8,8,8,0.5) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+        .player-header { padding: 12px 16px !important; flex-wrap: wrap !important; gap: 12px 0 !important; flex-direction: row !important; background: rgba(10,10,10,0.35) !important; backdrop-filter: blur(24px) !important; -webkit-backdrop-filter: blur(24px) !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important; }
         .player-header-center { position: static !important; transform: none !important; width: 100% !important; margin-top: 4px !important; order: 3; }
         .player-header-left { flex: 1; min-width: 0; }
         .player-header > button { order: 2; margin-left: auto; }
