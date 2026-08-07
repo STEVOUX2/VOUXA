@@ -165,24 +165,27 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
             -webkit-overflow-scrolling: touch; 
             margin: 0 auto 32px !important;
             scrollbar-width: none;
+            width: fit-content !important;
           }
           .tabs-container::-webkit-scrollbar {
             display: none !important;
           }
           .two-column-layout { grid-template-columns: 1fr !important; display: flex !important; flex-direction: column !important; gap: 24px !important; }
+          .left-sidebar { align-items: center !important; }
           .sidebar-inner { 
             display: flex !important; 
             flex-direction: row !important; 
             overflow-x: auto; 
             padding: 0 !important; 
-            margin: 0 !important;
+            margin: 0 auto !important;
             background: transparent !important;
             border: none !important;
             white-space: nowrap; 
             border-radius: 0 !important; 
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
-            width: 100%;
+            width: max-content !important;
+            max-width: 100%;
             justify-content: flex-start;
             gap: 8px !important;
           }
@@ -201,7 +204,7 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
             padding: 0 !important;
             margin: 0 !important;
           }
-          .sidebar-link { border-bottom: none !important; border-right: none !important; padding: 10px 18px !important; border-radius: 8px; background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.06) !important; }
+          .sidebar-link { border-bottom: none !important; border-right: none !important; padding: 10px 18px !important; border-radius: 8px; background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.06) !important; flex-shrink: 0; }
           .sidebar-link > svg:last-child { display: none; }
           .account-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
           .badges-grid { grid-template-columns: 1fr !important; }
@@ -341,7 +344,7 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
         <div className="two-column-layout" style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '24px', alignItems: 'start' }}>
 
           {/* LEFT SIDEBAR */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="left-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {/* Quick Links */}
             <div className="sidebar-inner" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', overflow: 'hidden' }}>
               <div className="sidebar-title" style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', fontSize: '11px', fontWeight: 700, color: '#4E4E4E', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
@@ -358,20 +361,19 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', opacity: 0.3 }}><polyline points="9 18 15 12 9 6"/></svg>
                 </Link>
               ))}
+              {/* Admin Panel (Moved inside sidebar-inner) */}
+              {isAdmin && (
+                <Link href="/admin" style={{
+                  display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 20px',
+                  background: 'rgba(123,16,22,0.08)', border: '1px solid rgba(123,16,22,0.2)',
+                  color: '#ff6b6b', textDecoration: 'none', fontSize: '14px', fontWeight: 600, transition: 'all 0.15s',
+                }} className="sidebar-link">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  Admin Panel
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}><polyline points="9 18 15 12 9 6"/></svg>
+                </Link>
+              )}
             </div>
-
-            {/* Admin Panel */}
-            {isAdmin && (
-              <Link href="/admin" style={{
-                display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 20px',
-                background: 'rgba(123,16,22,0.08)', border: '1px solid rgba(123,16,22,0.2)', borderRadius: '12px',
-                color: '#ff6b6b', textDecoration: 'none', fontSize: '14px', fontWeight: 600, transition: 'all 0.15s',
-              }} className="sidebar-link">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Admin Panel
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}><polyline points="9 18 15 12 9 6"/></svg>
-              </Link>
-            )}
           </div>
 
           {/* RIGHT CONTENT */}
