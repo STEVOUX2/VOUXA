@@ -505,7 +505,10 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
           <div className="detail-buttons" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {/* Play Button */}
             <button 
-              onClick={() => setWatchMovie(true)} 
+              onClick={() => {
+                if (!currentUserId) { setAuthOpen(true); return; }
+                setWatchMovie(true);
+              }} 
               style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 background: '#F2F2F0', color: '#080808', fontWeight: 700, fontSize: '13px',
