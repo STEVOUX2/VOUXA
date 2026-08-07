@@ -152,60 +152,74 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
         
         @media (max-width: 768px) {
           .banner-container { height: 160px !important; }
-          .profile-container { padding: 0 16px 80px !important; }
+          .profile-container { padding: 0 16px 80px !important; overflow-x: hidden !important; }
           .profile-header-row { flex-direction: column !important; align-items: center !important; margin-bottom: 32px !important; }
           .profile-avatar-group { flex-direction: column !important; align-items: center !important; margin-top: -60px !important; text-align: center; }
           .profile-avatar { width: 100px !important; height: 100px !important; }
           .header-actions-group { flex-wrap: wrap !important; justify-content: center !important; margin-top: 16px !important; }
-          .stats-strip { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; margin-bottom: 24px !important; }
-          .stats-item { padding: 16px !important; flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+          
+          /* Horizontal swipeable stats */
+          .stats-strip { 
+            display: flex !important; 
+            flex-direction: row !important; 
+            overflow-x: auto !important; 
+            scrollbar-width: none !important;
+            -webkit-overflow-scrolling: touch !important;
+            gap: 12px !important; 
+            padding: 4px 16px !important;
+            margin: 0 -16px 32px -16px !important; 
+          }
+          .stats-strip::-webkit-scrollbar { display: none !important; }
+          .stats-item { 
+            padding: 16px !important; 
+            flex-direction: column !important; 
+            align-items: flex-start !important; 
+            gap: 12px !important; 
+            min-width: 150px !important; 
+            flex-shrink: 0 !important; 
+          }
+
+          /* Tabs perfectly centered but scrollable */
           .tabs-container { 
-            overflow-x: auto; 
-            max-width: 100%; 
-            -webkit-overflow-scrolling: touch; 
+            overflow-x: auto !important; 
+            max-width: 100% !important; 
+            -webkit-overflow-scrolling: touch !important; 
             margin: 0 auto 32px !important;
-            scrollbar-width: none;
-            width: fit-content !important;
+            scrollbar-width: none !important;
+            width: max-content !important;
+            padding: 4px !important;
           }
-          .tabs-container::-webkit-scrollbar {
-            display: none !important;
-          }
+          .tabs-container::-webkit-scrollbar { display: none !important; }
+          
           .two-column-layout { grid-template-columns: 1fr !important; display: flex !important; flex-direction: column !important; gap: 24px !important; }
-          .left-sidebar { align-items: center !important; }
+          .left-sidebar { align-items: center !important; width: 100% !important; overflow: hidden !important; }
+          
+          /* Quick Links swipeable row */
           .sidebar-inner { 
             display: flex !important; 
             flex-direction: row !important; 
-            overflow-x: auto; 
-            padding: 0 !important; 
-            margin: 0 auto !important;
+            overflow-x: auto !important; 
+            padding: 4px 16px !important; 
+            margin: 0 -16px !important;
             background: transparent !important;
             border: none !important;
-            white-space: nowrap; 
+            white-space: nowrap !important; 
             border-radius: 0 !important; 
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-            width: max-content !important;
-            max-width: 100%;
-            justify-content: flex-start;
-            gap: 8px !important;
+            scrollbar-width: none !important;
+            -webkit-overflow-scrolling: touch !important;
+            width: calc(100% + 32px) !important;
+            justify-content: flex-start !important;
+            gap: 12px !important;
           }
-          .sidebar-inner::-webkit-scrollbar {
-            display: none !important;
-          }
-          .sidebar-inner > a:first-of-type {
-            margin-left: 0 !important;
-          }
+          .sidebar-inner::-webkit-scrollbar { display: none !important; }
+          .sidebar-inner > a:first-of-type { margin-left: 0 !important; }
+          
           .sidebar-title { 
             display: none !important;
-            position: absolute !important;
-            visibility: hidden !important;
-            width: 0 !important;
-            height: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
           }
-          .sidebar-link { border-bottom: none !important; border-right: none !important; padding: 10px 18px !important; border-radius: 8px; background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.06) !important; flex-shrink: 0; }
-          .sidebar-link > svg:last-child { display: none; }
+          .sidebar-link { border-bottom: none !important; border-right: none !important; padding: 12px 20px !important; border-radius: 12px !important; background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.08) !important; flex-shrink: 0 !important; font-size: 13px !important; }
+          .sidebar-link > svg:last-child { display: none !important; }
+          
           .account-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
           .badges-grid { grid-template-columns: 1fr !important; }
           .prefs-grid { grid-template-columns: 1fr !important; }
