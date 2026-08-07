@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  allowedDevOrigins: ['10.0.2.2', 'localhost'],
   async headers() {
     return [
       {
