@@ -198,8 +198,9 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
           .left-sidebar { 
             width: 100% !important; 
             overflow: hidden !important; 
-            display: flex !important; 
-            justify-content: center !important; 
+            display: flex !important;
+            flex-direction: column !important; 
+            align-items: center !important; 
           }
           
           /* Quick Links swipeable row */
