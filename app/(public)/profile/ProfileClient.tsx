@@ -166,8 +166,10 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
             scrollbar-width: none !important;
             -webkit-overflow-scrolling: touch !important;
             gap: 12px !important; 
-            padding: 4px 16px !important;
-            margin: 0 -16px 32px -16px !important; 
+            padding: 4px !important;
+            margin: 0 auto 32px auto !important;
+            width: max-content !important;
+            max-width: 100% !important;
           }
           .stats-strip::-webkit-scrollbar { display: none !important; }
           .stats-item { 
@@ -181,10 +183,11 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
 
           /* Tabs perfectly centered but scrollable */
           .tabs-container { 
+            display: flex !important;
             overflow-x: auto !important; 
             max-width: 100% !important; 
             -webkit-overflow-scrolling: touch !important; 
-            margin: 0 auto 32px !important;
+            margin: 0 auto 32px auto !important;
             scrollbar-width: none !important;
             width: max-content !important;
             padding: 4px !important;
@@ -192,22 +195,28 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
           .tabs-container::-webkit-scrollbar { display: none !important; }
           
           .two-column-layout { grid-template-columns: 1fr !important; display: flex !important; flex-direction: column !important; gap: 24px !important; }
-          .left-sidebar { align-items: center !important; width: 100% !important; overflow: hidden !important; }
+          .left-sidebar { 
+            width: 100% !important; 
+            overflow: hidden !important; 
+            display: flex !important; 
+            justify-content: center !important; 
+          }
           
           /* Quick Links swipeable row */
           .sidebar-inner { 
             display: flex !important; 
             flex-direction: row !important; 
             overflow-x: auto !important; 
-            padding: 4px 16px !important; 
-            margin: 0 -16px !important;
+            padding: 4px !important; 
+            margin: 0 auto !important;
             background: transparent !important;
             border: none !important;
             white-space: nowrap !important; 
             border-radius: 0 !important; 
             scrollbar-width: none !important;
             -webkit-overflow-scrolling: touch !important;
-            width: calc(100% + 32px) !important;
+            width: max-content !important;
+            max-width: 100% !important;
             justify-content: flex-start !important;
             gap: 12px !important;
           }
