@@ -170,27 +170,33 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
+    const CW_KEY = 'vouxa_continue_watching';
+    const tmdbIdInt = parseInt(movie?.tmdb_id || idParam);
+
     if (watchMovie && movie) {
       sendYtCmd('pauseVideo');
       document.body.style.overflow = 'hidden';
 
-      const saveToLocal = (minutesWatched: number) => {
-        if (!movie) return;
+      let currentSeconds = 0;
+      
+      const saveToLocal = (secondsWatched: number) => {
         try {
-          const CW_KEY = 'vouxa_continue_watching';
-          const local = localStorage.getItem(CW_KEY);
-          const list = local ? JSON.parse(local) : [];
-          const tmdbIdInt = parseInt(movie.tmdb_id || movie.id);
+          const raw = localStorage.getItem(CW_KEY);
+          let list = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(list)) list = [];
           
           const filtered = list.filter((i: any) => !(i.tmdbId === tmdbIdInt && i.mediaType === 'movie'));
           const prev = list.find((i: any) => i.tmdbId === tmdbIdInt && i.mediaType === 'movie');
+          
+          const newRuntime = (prev?.runtime || 0) + secondsWatched;
+          currentSeconds = newRuntime;
           
           filtered.push({
             tmdbId: tmdbIdInt,
             mediaType: 'movie',
             title: movie.title,
             posterPath: movie.poster_path,
-            runtime: (prev?.runtime || 0) + minutesWatched,
+            runtime: newRuntime,
             duration: movie.runtime || 0,
             watchedAt: Date.now()
           });
@@ -207,13 +213,13 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
       import('@/app/actions/user').then(({ logHistory }) => {
         logHistory(movie.tmdb_id || movie.id, 'movie', 0, movie.title, movie.poster_path, movie.runtime || 0);
       });
-      // Periodically update watch time (60 second intervals)
+      // Periodically update watch time (5 second intervals)
       interval = setInterval(() => {
-        saveToLocal(1);
-        import('@/app/actions/user').then(({ saveProgress }) => {
-          saveProgress(movie.tmdb_id || movie.id, 'movie', 1);
+        saveToLocal(5);
+        import('@/app/actions/user').then(({ saveExactTime }) => {
+          saveExactTime(movie.tmdb_id || movie.id, 'movie', currentSeconds);
         });
-      }, 60000);
+      }, 5000);
     } else {
       sendYtCmd('playVideo');
       document.body.style.overflow = 'auto';

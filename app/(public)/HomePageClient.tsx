@@ -321,17 +321,21 @@ export function HomePageClient({ continueWatching = [] }: { continueWatching?: a
                             <span>
                               <span style={{ color: '#F2F2F0' }}>S{item.season} E{item.episode}</span>
                               {item.runtime ? (() => {
-                                const totalSeconds = Math.round(item.runtime * 60);
-                                const mins = Math.floor(totalSeconds / 60);
+                                const totalSeconds = Math.round(item.runtime);
+                                const hours = Math.floor(totalSeconds / 3600);
+                                const mins = Math.floor((totalSeconds % 3600) / 60);
                                 const secs = totalSeconds % 60;
+                                if (hours > 0) return ` • ${hours}h ${mins}m ${secs}s watched`;
                                 return ` • ${mins}m ${secs}s watched`;
                               })() : ' • Just started'}
                             </span>
                           ) : (
                             item.runtime ? (() => {
-                              const totalSeconds = Math.round(item.runtime * 60);
-                              const mins = Math.floor(totalSeconds / 60);
+                              const totalSeconds = Math.round(item.runtime);
+                              const hours = Math.floor(totalSeconds / 3600);
+                              const mins = Math.floor((totalSeconds % 3600) / 60);
                               const secs = totalSeconds % 60;
+                              if (hours > 0) return `${hours}h ${mins}m ${secs}s watched`;
                               return `${mins}m ${secs}s watched`;
                             })() : 'Just started'
                           )}

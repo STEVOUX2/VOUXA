@@ -191,22 +191,28 @@ export function TvDetailClient({ idParam, currentUserId, initialServers = [], wa
       sendYtCmd('pauseVideo');
       document.body.style.overflow = 'hidden';
 
-      const saveToLocal = (minutesWatched: number) => {
+      const tmdbIdInt = parseInt(tv.id);
+      let currentSeconds = 0;
+      
+      const saveToLocal = (secondsWatched: number) => {
         try {
           const CW_KEY = 'vouxa_continue_watching';
           const local = localStorage.getItem(CW_KEY);
-          const list = local ? JSON.parse(local) : [];
-          const tmdbIdInt = parseInt(tv.id);
+          let list = local ? JSON.parse(local) : [];
+          if (!Array.isArray(list)) list = [];
           
           const filtered = list.filter((i: any) => !(i.tmdbId === tmdbIdInt && i.mediaType === 'tv'));
           const prev = list.find((i: any) => i.tmdbId === tmdbIdInt && i.mediaType === 'tv');
+          
+          const newRuntime = (prev?.runtime || 0) + secondsWatched;
+          currentSeconds = newRuntime;
           
           filtered.push({
             tmdbId: tmdbIdInt,
             mediaType: 'tv',
             title: tv.name,
             posterPath: tv.poster_path,
-            runtime: (prev?.runtime || 0) + minutesWatched,
+            runtime: newRuntime,
             duration: tv.episode_run_time?.[0] || 45,
             watchedAt: Date.now()
           });
@@ -223,13 +229,13 @@ export function TvDetailClient({ idParam, currentUserId, initialServers = [], wa
       import('@/app/actions/user').then(({ logHistory }) => {
         logHistory(tv.id, 'tv', 0, tv.name, tv.poster_path, tv.episode_run_time?.[0] || 45);
       });
-      // Periodically update watch time (60 second intervals)
+      // Periodically update watch time (5 second intervals)
       interval = setInterval(() => {
-        saveToLocal(1);
-        import('@/app/actions/user').then(({ saveProgress }) => {
-          saveProgress(tv.id, 'tv', 1);
+        saveToLocal(5);
+        import('@/app/actions/user').then(({ saveExactTime }) => {
+          saveExactTime(tv.id, 'tv', currentSeconds);
         });
-      }, 60000);
+      }, 5000);
     } else {
       sendYtCmd('playVideo');
       document.body.style.overflow = 'auto';

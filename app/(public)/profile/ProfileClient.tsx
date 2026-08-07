@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { updateProfile, updatePreferences, deleteReview } from '@/app/actions/user';
+import { clearFullHistory } from '@/app/actions/history';
 import { logout } from '@/app/auth/actions';
 import * as LucideIcons from 'lucide-react';
 
@@ -25,6 +26,7 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [prefsLoading, setPrefsLoading] = useState(false);
+  const [isClearingHistory, startClearHistoryTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [reviews, setReviews] = useState(initialReviews);
 
@@ -94,6 +96,21 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
     if (res.error) showToast(res.error, 'error');
     else { setSaved(true); showToast('Preferences saved successfully!', 'success'); setTimeout(() => setSaved(false), 2000); }
     setPrefsLoading(false);
+  };
+
+  const handleClearHistory = () => {
+    if (confirm('Are you sure you want to clear your entire watch history? This action cannot be undone.')) {
+      startClearHistoryTransition(async () => {
+        const res = await clearFullHistory();
+        if (res.success) {
+          try { localStorage.removeItem('vouxa_continue_watching'); } catch (e) {}
+          showToast('Watch history cleared successfully!', 'success');
+          router.refresh();
+        } else {
+          showToast('Failed to clear history: ' + res.error, 'error');
+        }
+      });
+    }
   };
 
   const navLinks = [
@@ -663,6 +680,26 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
                           </div>
                         </div>
                       ))}
+                    </div>
+
+                    <div style={{ marginBottom: '32px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                      <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#F2F2F0', marginBottom: '8px' }}>Data & Privacy</h3>
+                      <p style={{ fontSize: '12px', color: '#7E7E7E', marginBottom: '16px' }}>Manage your viewing data and history.</p>
+                      <button 
+                        type="button" 
+                        onClick={handleClearHistory}
+                        disabled={isClearingHistory}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '10px', padding: '10px 16px', color: '#ff6b6b', fontSize: '13px', fontWeight: 600, cursor: isClearingHistory ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
+                        onMouseOver={(e) => { if (!isClearingHistory) e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)' }}
+                        onMouseOut={(e) => { if (!isClearingHistory) e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)' }}
+                      >
+                        {isClearingHistory ? (
+                          <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,107,107,0.3)', borderTopColor: '#ff6b6b', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                          <LucideIcons.Trash2 size={14} />
+                        )}
+                        {isClearingHistory ? 'Clearing History...' : 'Clear Watch History'}
+                      </button>
                     </div>
 
                     <button type="submit" disabled={prefsLoading} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#7B1016', border: 'none', borderRadius: '10px', padding: '12px 24px', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: prefsLoading ? 'not-allowed' : 'pointer', opacity: prefsLoading ? 0.7 : 1, transition: 'all 0.2s' }}>

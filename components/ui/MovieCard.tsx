@@ -218,7 +218,14 @@ export const MovieCard = memo(function MovieCard({ movie, index = 0, variant = '
               <>
                 <span className="mc-meta-dot" style={{ color: '#4E4E4E', fontSize: '11px' }}>·</span>
                 <span style={{ color: '#ff6b6b', fontWeight: 600, fontSize: '11px' }}>
-                  {(movie as any).runtime_watched}m watched
+                  {(() => {
+                    const secs = Math.floor((movie as any).runtime_watched);
+                    const h = Math.floor(secs / 3600);
+                    const m = Math.floor((secs % 3600) / 60);
+                    const s = secs % 60;
+                    if (h > 0) return `${h}h ${m}m ${s}s watched`;
+                    return `${m}m ${s}s watched`;
+                  })()}
                 </span>
               </>
             )}

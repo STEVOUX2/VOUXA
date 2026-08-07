@@ -12,14 +12,15 @@ interface VideoPlayerProps {
   tmdbId: number;
   title: string;
   subtitles?: Subtitle[];
+  initialRuntime?: number;
 }
 
-export function VideoPlayer({ tmdbId, title, subtitles = [] }: VideoPlayerProps) {
+export function VideoPlayer({ tmdbId, title, subtitles = [], initialRuntime = 0 }: VideoPlayerProps) {
   const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [selectedSubtitle, setSelectedSubtitle] = useState<string | null>(null);
   const [syncOffset, setSyncOffset] = useState(0);
 
-  const embedUrl = `https://streamvaultsrc.click/embed/movie/${tmdbId}`;
+  const embedUrl = `https://streamvaultsrc.click/embed/movie/${tmdbId}${initialRuntime > 0 ? `?t=${initialRuntime}` : ''}`;
 
   // Toggle body overflow when in theater mode
   useEffect(() => {

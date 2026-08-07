@@ -160,6 +160,50 @@ export async function saveProgress(tmdbId: number | string, mediaType: 'movie' |
   return { success: true };
 }
 
+export async function saveExactTime(tmdbId: number | string, mediaType: 'movie' | 'tv' | 'anime', exactTimeSeconds: number) {
+  const supabase = await createClient();
+  const user = await getCurrentUser();
+
+  if (!user) return { success: false };
+
+  const now = new Date().toISOString();
+
+  // Make sure to not overwrite with a smaller value if not needed, but since it's exact time, we DO want to overwrite 
+  // (in case they rewind). So we just update the runtime directly.
+  const { data: history } = await supabase
+    .from('user_history')
+    .select('id, runtime')
+    .eq('user_id', user.id)
+    .eq('tmdb_id', tmdbId.toString())
+    .eq('media_type', mediaType)
+    .single();
+
+  if (history) {
+    await supabase
+      .from('user_history')
+      .update({
+        runtime: exactTimeSeconds,
+        watched_at: now,
+        last_watched_at: now,
+      })
+      .eq('id', history.id);
+  } else {
+    await supabase
+      .from('user_history')
+      .insert({
+        user_id: user.id,
+        tmdb_id: tmdbId.toString(),
+        media_type: mediaType,
+        runtime: exactTimeSeconds,
+        watched_at: now,
+        last_watched_at: now,
+      });
+  }
+
+  // We don't revalidate path here to prevent aggressive UI flashing on every 5s save
+  return { success: true };
+}
+
 export async function getWatchlist() {
   const supabase = await createClient();
   const user = await getCurrentUser();

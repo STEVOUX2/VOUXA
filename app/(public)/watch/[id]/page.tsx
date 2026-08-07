@@ -17,10 +17,28 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
     movie = data;
   }
 
+  let initialRuntime = 0;
+  
   if (movie) {
     const { data } = await supabase.from('subtitles').select('*').eq('movie_id', movie.id);
     subtitles = data || [];
+    
+    // Fetch user history to get exact resume time
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData?.session?.user;
+    if (user) {
+      const { data: history } = await supabase
+        .from('user_history')
+        .select('runtime')
+        .eq('user_id', user.id)
+        .eq('tmdb_id', movie.tmdb_id?.toString() || id)
+        .single();
+      
+      if (history && history.runtime) {
+        initialRuntime = history.runtime;
+      }
+    }
   }
 
-  return <WatchClient initialMovie={movie} initialSubtitles={subtitles} idParam={id} />;
+  return <WatchClient initialMovie={movie} initialSubtitles={subtitles} idParam={id} initialRuntime={initialRuntime} />;
 }

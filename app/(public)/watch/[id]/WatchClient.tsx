@@ -4,11 +4,32 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { VideoPlayer } from '@/components/ui/VideoPlayer';
 
-export function WatchClient({ initialMovie, initialSubtitles, idParam }: { initialMovie: any, initialSubtitles: any[], idParam: string }) {
+import { saveExactTime } from '@/app/actions/user';
+
+export function WatchClient({ initialMovie, initialSubtitles, idParam, initialRuntime = 0 }: { initialMovie: any, initialSubtitles: any[], idParam: string, initialRuntime?: number }) {
   const [movie, setMovie] = useState(initialMovie);
   const [subtitles, setSubtitles] = useState(initialSubtitles);
   const [loading, setLoading] = useState(!initialMovie);
   const [error, setError] = useState<string | null>(null);
+  
+  // Track exact time based on initialRuntime
+  const [currentRuntime, setCurrentRuntime] = useState(initialRuntime);
+
+  useEffect(() => {
+    if (!movie) return;
+    
+    // Save exact time every 5 seconds (assuming they are watching)
+    const interval = setInterval(() => {
+      setCurrentRuntime(prev => {
+        const next = prev + 5;
+        // Fire and forget save
+        saveExactTime(movie.tmdb_id || movie.id, 'movie', next);
+        return next;
+      });
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [movie]);
 
   useEffect(() => {
     if (initialMovie) return;
@@ -79,6 +100,7 @@ export function WatchClient({ initialMovie, initialSubtitles, idParam }: { initi
             tmdbId={movie.tmdb_id}
             title={movie.title}
             subtitles={subtitles}
+            initialRuntime={initialRuntime}
           />
         </div>
         

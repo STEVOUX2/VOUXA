@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useTransition } from 'react';
 import { MovieCard } from '@/components/ui/MovieCard';
+import { clearFullHistory, removeHistoryItem } from '@/app/actions/history';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type InitialItem = { tmdb_id: string | number; media_type: string; runtime?: number };
 
@@ -11,6 +13,8 @@ type SortType = 'Recent' | 'Oldest' | 'A-Z';
 export default function HistoryClient({ initialItems }: { initialItems: InitialItem[] }) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [filter, setFilter] = useState<FilterType>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,7 +24,41 @@ export default function HistoryClient({ initialItems }: { initialItems: InitialI
     const fetchDetails = async () => {
       setLoading(true);
       try {
-        const promises = initialItems.map(async (item, index) => {
+        const localRaw = localStorage.getItem('vouxa_continue_watching');
+        const localItems = localRaw ? JSON.parse(localRaw) : [];
+        
+        // Merge Supabase items and local items
+        const mergedMap = new Map();
+        
+        initialItems.forEach(item => {
+          mergedMap.set(`${item.tmdb_id}-${item.media_type}`, item);
+        });
+        
+        localItems.forEach((item: any) => {
+          const key = `${item.tmdbId}-${item.mediaType}`;
+          if (!mergedMap.has(key)) {
+            mergedMap.set(key, {
+              tmdb_id: item.tmdbId,
+              media_type: item.mediaType,
+              runtime: item.runtime || 0,
+            });
+          } else {
+            // Update runtime if local is greater
+            const existing = mergedMap.get(key);
+            if ((item.runtime || 0) > (existing.runtime || 0)) {
+              mergedMap.set(key, { ...existing, runtime: item.runtime });
+            }
+          }
+        });
+        
+        const allItems = Array.from(mergedMap.values());
+        
+        if (allItems.length === 0) {
+          setLoading(false);
+          return;
+        }
+
+        const promises = allItems.map(async (item, index) => {
           const res = await fetch(
             `https://api.tmdb.org/3/${item.media_type}/${item.tmdb_id}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=en-US`
           );
@@ -44,11 +82,8 @@ export default function HistoryClient({ initialItems }: { initialItems: InitialI
       }
     };
 
-    if (initialItems.length > 0) {
-      fetchDetails();
-    } else {
-      setLoading(false);
-    }
+    // Always run fetchDetails, it will short-circuit if both are empty
+    fetchDetails();
   }, [initialItems]);
 
   const stats = useMemo(() => {
@@ -87,6 +122,41 @@ export default function HistoryClient({ initialItems }: { initialItems: InitialI
 
     return result;
   }, [items, searchQuery, filter, sortBy]);
+
+  const handleClearAll = () => {
+    if (confirm('Are you sure you want to clear your entire watch history? This action cannot be undone.')) {
+      startTransition(async () => {
+        setItems([]);
+        try { localStorage.removeItem('vouxa_continue_watching'); } catch (e) {}
+        await clearFullHistory();
+      });
+    }
+  };
+
+  const handleRemoveItem = (tmdbId: string | number, mediaType: string) => {
+    setDeletingId(`${tmdbId}-${mediaType}`);
+    startTransition(async () => {
+      // 1. Remove from local state immediately for snappy UI
+      setItems(prev => prev.filter(i => !(i.id == tmdbId && i.media_type === mediaType)));
+
+      // 2. Remove from Local Storage
+      try {
+        const raw = localStorage.getItem('vouxa_continue_watching');
+        if (raw) {
+          const list = JSON.parse(raw);
+          const tmdbIdInt = parseInt(tmdbId.toString());
+          const filtered = list.filter((i: any) => !(i.tmdbId === tmdbIdInt && i.mediaType === mediaType));
+          localStorage.setItem('vouxa_continue_watching', JSON.stringify(filtered));
+        }
+      } catch (e) {
+        console.error("Local storage error:", e);
+      }
+
+      // 3. Remove from Database
+      await removeHistoryItem(tmdbId, mediaType);
+      setDeletingId(null);
+    });
+  };
 
   return (
     <div className="history-page" style={{
@@ -132,6 +202,37 @@ export default function HistoryClient({ initialItems }: { initialItems: InitialI
             }}>
               {stats.total} items
             </div>
+            
+            {items.length > 0 && (
+              <button
+                onClick={handleClearAll}
+                disabled={isPending}
+                style={{
+                  marginLeft: 'auto',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  color: isPending ? '#7E7E7E' : '#ff6b6b',
+                  border: '1px solid rgba(255,107,107,0.2)',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: isPending ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseOver={(e) => { if(!isPending) e.currentTarget.style.backgroundColor = 'rgba(255,107,107,0.1)' }}
+                onMouseOut={(e) => { if(!isPending) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)' }}
+              >
+                {isPending ? (
+                  <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#ff6b6b', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                )}
+                Clear Full History
+              </button>
+            )}
           </div>
 
           <div className="history-stats" style={{ display: 'flex', gap: '32px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', padding: '20px 0' }}>
@@ -256,19 +357,69 @@ export default function HistoryClient({ initialItems }: { initialItems: InitialI
             ))}
           </div>
         ) : filteredAndSortedItems.length > 0 ? (
-          <div className="history-grid" style={{
+          <motion.div layout className="history-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
             gap: '24px'
           }}>
-            {filteredAndSortedItems.map((item) => (
-              <MovieCard
-                key={`${item.id}-${item.original_index}`}
-                movie={item}
-                variant="portrait"
-              />
-            ))}
-          </div>
+            <AnimatePresence>
+              {filteredAndSortedItems.map((item) => {
+                const itemId = `${item.id}-${item.media_type}`;
+                const isDeleting = deletingId === itemId;
+                
+                return (
+                  <motion.div
+                    key={`${item.id}-${item.original_index}`}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
+                    transition={{ duration: 0.2 }}
+                    style={{ position: 'relative' }}
+                    className="history-item-wrapper"
+                  >
+                    <div style={{ opacity: isDeleting ? 0.5 : 1, transition: 'opacity 0.2s', pointerEvents: isDeleting ? 'none' : 'auto' }}>
+                      <MovieCard
+                        movie={item}
+                        variant="portrait"
+                      />
+                    </div>
+                    {/* Delete overlay button */}
+                    <button
+                      onClick={() => handleRemoveItem(item.id, item.media_type)}
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        backdropFilter: 'blur(4px)',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        zIndex: 10,
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#B1222E'; e.currentTarget.style.transform = 'scale(1.1)'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.6)'; e.currentTarget.style.transform = 'scale(1)'; }}
+                      title="Remove from history"
+                    >
+                      {isDeleting ? (
+                        <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      )}
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </motion.div>
         ) : (
           <div style={{
             display: 'flex',
@@ -293,6 +444,15 @@ export default function HistoryClient({ initialItems }: { initialItems: InitialI
           </div>
         )}
       </div>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .history-item-wrapper:hover button {
+          opacity: 1;
+        }
+      `}</style>
     </div>
   );
 }
