@@ -14,7 +14,6 @@ export function WatchPartyLobby({ isLoggedIn }: { isLoggedIn: boolean }) {
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!joinCode.trim()) return;
-    if (!isLoggedIn) { setError('Sign in to join a watch party.'); return; }
     setJoining(true);
     setError('');
     const res = await joinWatchParty(joinCode.trim());
