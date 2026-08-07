@@ -128,6 +128,7 @@ export function TvDetailClient({ idParam, currentUserId, initialServers = [], wa
   }, [tv]);
 
   const handlePlay = (epNum: number, epName: string, runtime: number) => {
+    if (!currentUserId) { setAuthOpen(true); return; }
     setWatchEpisode({ s: selectedSeason, e: epNum, name: epName });
   };
 

@@ -742,6 +742,10 @@ export async function createWatchParty(
 
   if (!user) return { error: 'You must be logged in.' };
 
+  // Run garbage collection on abandoned rooms (older than 12 hours) to free resources
+  const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+  supabase.from('watch_parties').delete().lt('created_at', twelveHoursAgo).then(() => {});
+
   const { data: profile } = await supabase.from('profiles').select('display_name, username').eq('id', user.id).single();
   const displayName = profile?.display_name || profile?.username || user.email?.split('@')[0] || 'Host';
 

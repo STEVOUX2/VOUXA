@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { WatchClient } from './WatchClient';
+import { redirect } from 'next/navigation';
 
 export default async function WatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,6 +27,11 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
     // Fetch user history to get exact resume time
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData?.session?.user;
+    
+    if (!user) {
+      redirect('/auth/signin');
+    }
+
     if (user) {
       const { data: history } = await supabase
         .from('user_history')

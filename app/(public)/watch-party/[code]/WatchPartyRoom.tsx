@@ -444,14 +444,16 @@ export function WatchPartyRoom({ party, initialMessages, initialMembers, current
             )}
 
             {partyStatus !== 'waiting' ? (
-              <iframe
-                key={selectedServer}
-                src={selectedServer}
-                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-                allowFullScreen
-                allow="fullscreen"
-                title={party.movie_title}
-              />
+              <div style={{ width: '100%', height: '100%', pointerEvents: isHost ? 'auto' : 'none' }}>
+                <iframe
+                  key={selectedServer}
+                  src={selectedServer}
+                  style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                  allowFullScreen
+                  allow="fullscreen"
+                  title={party.movie_title}
+                />
+              </div>
             ) : (
               <div style={{ width: '100%', height: '100%', background: '#050505' }} />
             )}
