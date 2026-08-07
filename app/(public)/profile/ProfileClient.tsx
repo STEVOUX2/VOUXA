@@ -152,7 +152,7 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
         
         @media (max-width: 768px) {
           .banner-container { height: 160px !important; }
-          .profile-container { padding: 0 16px 80px !important; overflow-x: hidden !important; }
+          .profile-container { padding: 0 16px 80px !important; }
           .profile-header-row { flex-direction: column !important; align-items: center !important; margin-bottom: 32px !important; }
           .profile-avatar-group { flex-direction: column !important; align-items: center !important; margin-top: -60px !important; text-align: center; }
           .profile-avatar { width: 100px !important; height: 100px !important; }
@@ -194,7 +194,14 @@ export function ProfileClient({ user, profile, preferences, totalWatchedCount, t
           }
           .tabs-container::-webkit-scrollbar { display: none !important; }
           
-          .two-column-layout { grid-template-columns: 1fr !important; display: flex !important; flex-direction: column !important; gap: 24px !important; }
+          .two-column-layout { 
+            grid-template-columns: 1fr !important; 
+            display: flex !important; 
+            flex-direction: column !important; 
+            gap: 24px !important; 
+            align-items: stretch !important; 
+          }
+          .fade-in { width: 100% !important; }
           .left-sidebar { 
             width: 100% !important; 
             overflow: hidden !important; 

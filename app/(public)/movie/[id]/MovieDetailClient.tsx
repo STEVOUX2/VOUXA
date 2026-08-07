@@ -34,6 +34,8 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
   const [watchlistLoading, setWatchlistLoading] = useState(true);
   const [watchPartyLoading, setWatchPartyLoading] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [showAuthMsg, setShowAuthMsg] = useState(false);
+  const [showNotification, setShowNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -506,7 +508,7 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
             {/* Play Button */}
             <button 
               onClick={() => {
-                if (!currentUserId) { setAuthOpen(true); return; }
+                if (!currentUserId) { setShowAuthMsg(true); return; }
                 setWatchMovie(true);
               }} 
               style={{
@@ -641,7 +643,6 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
           </div>
         </div>
       </div>
-
       {watchMovie && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999, background: '#080808',
@@ -649,39 +650,54 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
         }}>
           {!isVirtualFullscreen && (
             <div className="player-header" style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '24px 40px', background: 'linear-gradient(to bottom, rgba(8,8,8,0.9), transparent)',
+              display: 'flex', flexDirection: 'column', gap: '20px',
+              padding: '20px 24px', 
+              background: 'rgba(8,8,8,0.4)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+              borderBottom: '1px solid rgba(255,255,255,0.05)',
               position: 'relative', zIndex: 10
             }}>
-              <div className="player-header-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              {/* TOP ROW */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                 <button 
                   onClick={() => setWatchMovie(false)}
                   style={{
                     width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)',
                     border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#F2F2F0', cursor: 'pointer', transition: 'background 0.2s'
+                    color: '#F2F2F0', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0
                   }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                 </button>
-                <div>
-                  <h2 style={{ margin: 0, color: '#F2F2F0', fontSize: '20px', fontWeight: 700 }}>{movie.title}</h2>
-                </div>
+                
+                <h2 style={{ margin: '0 16px', color: '#F2F2F0', fontSize: '18px', fontWeight: 700, textAlign: 'center', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {movie.title}
+                </h2>
+                
+                <button 
+                  onClick={() => setWatchMovie(false)}
+                  style={{
+                    width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)',
+                    border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#F2F2F0', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
               </div>
               
-              <div className="player-header-center" style={{ 
-                position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                width: '60%', pointerEvents: 'none'
-              }}>
-                <div style={{ color: '#999', fontSize: '10px', textAlign: 'center', lineHeight: '1.4', pointerEvents: 'auto' }}>
+              {/* BOTTOM ROW (Servers) */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%' }}>
+                <div style={{ color: '#999', fontSize: '11px', textAlign: 'center', lineHeight: '1.4', maxWidth: '600px' }}>
                   {warningText || "If video isn't playing or buffering, try switching to another server. Try waiting on a server if it's loading, some take a bit of time. Some servers may contain a few ads."}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', pointerEvents: 'auto' }}>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', width: '100%' }}>
                   <style>{`
-                    .servers-desktop { display: flex !important; align-items: center; justify-content: center; margin: 0 auto; gap: 8px; background: rgba(255,255,255,0.03); padding: 6px 12px; borderRadius: 12px; border: 1px solid rgba(255,255,255,0.05); overflow-x: auto; max-width: 60vw; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                    .servers-desktop { display: flex !important; align-items: center; justify-content: center; margin: 0 auto; gap: 8px; background: rgba(255,255,255,0.03); padding: 6px 12px; borderRadius: 12px; border: 1px solid rgba(255,255,255,0.05); overflow-x: auto; max-width: 100%; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
                     .servers-desktop::-webkit-scrollbar { display: none; }
                     .servers-mobile { display: none !important; }
                     @media (max-width: 768px) {
@@ -690,7 +706,7 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
                     }
                   `}</style>
                   
-                  <div style={{ flex: 1, display: 'flex', justifyContent: 'center', position: 'relative' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
                     <div style={{ position: 'relative' }}>
                       <button
                         onClick={() => setServerDropdownOpen(!serverDropdownOpen)}
@@ -772,19 +788,6 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
                   </button>
                 </div>
               </div>
-              
-              <button 
-                onClick={() => setWatchMovie(false)}
-                style={{
-                  width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)',
-                  border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#F2F2F0', cursor: 'pointer', transition: 'background 0.2s'
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
             </div>
           )}
           <div style={{ flex: 1, backgroundColor: '#000', width: '100%', position: 'relative' }}>
@@ -920,6 +923,23 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
 
       {/* Modals */}
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
+
+      {showAuthMsg && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 99999, background: 'rgba(8,8,8,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'rgba(15,15,15,0.95)', border: '1px solid rgba(255,255,255,0.1)', padding: '32px', borderRadius: '16px', textAlign: 'center', maxWidth: '400px', width: '90%' }}>
+            <h3 style={{ color: '#F2F2F0', fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>Sign In Required</h3>
+            <p style={{ color: '#B9B9B9', fontSize: '14px', lineHeight: 1.5, marginBottom: '24px' }}>
+              To watch movies, you need to sign in to your account.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button onClick={() => setShowAuthMsg(false)} style={{ padding: '10px 24px', borderRadius: '999px', background: 'transparent', color: '#F2F2F0', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
+              <Link href="/auth/signin" style={{ padding: '10px 24px', borderRadius: '999px', background: '#F2F2F0', color: '#080808', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                Go to Sign In
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toast && (
         <div style={{
