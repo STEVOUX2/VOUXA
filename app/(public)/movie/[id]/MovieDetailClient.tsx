@@ -355,7 +355,10 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
         .detail-back-btn, .detail-mute-btn { top: 24px !important; }
         .detail-back-btn { left: 16px !important; }
         .detail-mute-btn { right: 16px !important; }
-        .player-header { padding: 16px !important; flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+        .player-header { padding: 12px 16px !important; flex-wrap: wrap !important; gap: 12px 0 !important; flex-direction: row !important; background: rgba(8,8,8,0.5) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+        .player-header-center { position: static !important; transform: none !important; width: 100% !important; margin-top: 4px !important; order: 3; }
+        .player-header-left { flex: 1; min-width: 0; }
+        .player-header > button { order: 2; margin-left: auto; }
       }
     `}</style>
     <div className="detail-layout" style={{ background: '#080808', minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif' }}>
@@ -638,9 +641,10 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
           {!isVirtualFullscreen && (
             <div className="player-header" style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '24px 40px', background: 'linear-gradient(to bottom, rgba(8,8,8,0.9), transparent)'
+              padding: '24px 40px', background: 'linear-gradient(to bottom, rgba(8,8,8,0.9), transparent)',
+              position: 'relative', zIndex: 10
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div className="player-header-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                 <button 
                   onClick={() => setWatchMovie(false)}
                   style={{
@@ -658,11 +662,15 @@ export function MovieDetailClient({ initialMovie, initialSubtitles, initialServe
                 </div>
               </div>
               
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                <div style={{ color: '#999', fontSize: '10px', maxWidth: '65vw', textAlign: 'center', lineHeight: '1.4' }}>
+              <div className="player-header-center" style={{ 
+                position: 'absolute', left: '50%', transform: 'translateX(-50%)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                width: '60%', pointerEvents: 'none'
+              }}>
+                <div style={{ color: '#999', fontSize: '10px', textAlign: 'center', lineHeight: '1.4', pointerEvents: 'auto' }}>
                   {warningText || "If video isn't playing or buffering, try switching to another server. Try waiting on a server if it's loading, some take a bit of time. Some servers may contain a few ads."}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', pointerEvents: 'auto' }}>
                   <style>{`
                     .servers-desktop { display: flex !important; align-items: center; justify-content: center; margin: 0 auto; gap: 8px; background: rgba(255,255,255,0.03); padding: 6px 12px; borderRadius: 12px; border: 1px solid rgba(255,255,255,0.05); overflow-x: auto; max-width: 60vw; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
                     .servers-desktop::-webkit-scrollbar { display: none; }

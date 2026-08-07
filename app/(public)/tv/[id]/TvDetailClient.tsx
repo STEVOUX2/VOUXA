@@ -347,7 +347,10 @@ export function TvDetailClient({ idParam, currentUserId, initialServers = [], wa
         .episode-item { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
         .episode-item > div:first-child { width: 100% !important; height: auto !important; aspect-ratio: 16/9; }
         .detail-recs { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important; gap: 12px !important; }
-        .player-header { padding: 16px !important; flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+        .player-header { padding: 16px !important; flex-wrap: wrap !important; gap: 12px 0 !important; flex-direction: row !important; background: rgba(8,8,8,0.65) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+        .player-header-center { position: static !important; transform: none !important; width: 100% !important; margin-top: 4px !important; order: 3; }
+        .player-header-left { flex: 1; min-width: 0; }
+        .player-header-close { order: 2; margin-left: 12px; }
         .episode-controls { flex-wrap: wrap !important; }
         .episode-search { width: 100% !important; }
       }
@@ -360,9 +363,10 @@ export function TvDetailClient({ idParam, currentUserId, initialServers = [], wa
           {!isVirtualFullscreen && (
             <div className="player-header" style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '24px 40px', background: 'linear-gradient(to bottom, rgba(8,8,8,0.9), transparent)'
+              padding: '24px 40px', background: 'linear-gradient(to bottom, rgba(8,8,8,0.9), transparent)',
+              position: 'relative', zIndex: 10
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div className="player-header-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                 <button 
                   onClick={() => setWatchEpisode(null)}
                   style={{
@@ -383,11 +387,15 @@ export function TvDetailClient({ idParam, currentUserId, initialServers = [], wa
                 </div>
               </div>
               
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                <div style={{ color: '#999', fontSize: '10px', maxWidth: '65vw', textAlign: 'center', lineHeight: '1.4' }}>
+              <div className="player-header-center" style={{ 
+                position: 'absolute', left: '50%', transform: 'translateX(-50%)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                width: '60%', pointerEvents: 'none'
+              }}>
+                <div style={{ color: '#999', fontSize: '10px', textAlign: 'center', lineHeight: '1.4', pointerEvents: 'auto' }}>
                   {warningText || "If video isn't playing or buffering, try switching to another server. Try waiting on a server if it's loading, some take a bit of time. Some servers may contain a few ads."}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', pointerEvents: 'auto' }}>
                   <style>{`
                     .servers-desktop { display: flex !important; align-items: center; justify-content: center; margin: 0 auto; gap: 8px; background: rgba(255,255,255,0.03); padding: 6px 12px; borderRadius: 12px; border: 1px solid rgba(255,255,255,0.05); overflow-x: auto; max-width: 60vw; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
                     .servers-desktop::-webkit-scrollbar { display: none; }

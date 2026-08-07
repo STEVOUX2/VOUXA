@@ -49,6 +49,7 @@ export function WatchPartyRoom({ party, initialMessages, initialMembers, current
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [chatWidth] = useState(340);
   const [isVirtualFullscreen, setIsVirtualFullscreen] = useState(false);
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -315,10 +316,23 @@ export function WatchPartyRoom({ party, initialMessages, initialMembers, current
   ];
 
   return (
-    <div style={{ background: '#050505', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="watch-party-layout" style={{ background: '#050505', height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <style>{`
+        .wp-chat-sidebar { width: 340px; position: relative; }
+        @media (max-width: 768px) {
+          .wp-top-bar { height: auto !important; padding: 12px !important; flex-wrap: wrap !important; gap: 12px !important; }
+          .wp-top-bar-center { width: 100% !important; justify-content: space-between !important; order: 3; }
+          .wp-chat-sidebar { position: fixed !important; top: 0; bottom: 0; right: 0; left: 0; width: 100vw !important; max-width: 100vw !important; z-index: 9999 !important; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+          .wp-chat-sidebar.open { transform: translateX(0); }
+          .wp-mobile-chat-toggle { display: flex !important; }
+          .wp-mobile-chat-close { display: flex !important; }
+        }
+        .wp-mobile-chat-toggle { display: none; align-items: center; justify-content: center; background: rgba(8,8,8,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(123,16,22,0.8); border-radius: 50%; width: 42px; height: 42px; color: #F2F2F0; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(123,16,22,0.2); }
+        .wp-mobile-chat-close { display: none; align-items: center; justify-content: center; background: transparent; border: none; color: #7E7E7E; cursor: pointer; padding: 4px; border-radius: 4px; }
+      `}</style>
       
       {/* ── Top Bar ── */}
-      <div style={{ height: '52px', background: 'rgba(8,8,8,0.95)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', flexShrink: 0, zIndex: 10 }}>
+      <div className="wp-top-bar" style={{ height: '52px', background: 'rgba(8,8,8,0.95)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', flexShrink: 0, zIndex: 10 }}>
         
         {/* Left: Movie info */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
@@ -332,7 +346,7 @@ export function WatchPartyRoom({ party, initialMessages, initialMembers, current
         </div>
 
         {/* Center: Room code + status + Server */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="wp-top-bar-center" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* Custom Server Dropdown */}
           <div style={{ position: 'relative' }}>
             <button 
@@ -374,13 +388,19 @@ export function WatchPartyRoom({ party, initialMessages, initialMembers, current
         </div>
 
         {/* Right: Members avatars */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          {members.slice(0, 6).map((m, i) => (
-            <div key={m.user_id} title={m.display_name} style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #7B1016, #5D0F14)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#F2F2F0', border: '2px solid #050505', marginLeft: i > 0 ? '-6px' : 0, overflow: 'hidden', zIndex: members.length - i }}>
-              {m.avatar_url ? <img src={m.avatar_url} alt={m.display_name || 'User avatar'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : m.display_name[0]?.toUpperCase()}
-            </div>
-          ))}
-          {members.length > 6 && <div style={{ fontSize: '11px', color: '#7E7E7E', marginLeft: '8px' }}>+{members.length - 6}</div>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button className="wp-mobile-chat-toggle" onClick={() => setIsMobileChatOpen(!isMobileChatOpen)} title="Toggle Chat">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </button>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {members.slice(0, 6).map((m, i) => (
+              <div key={m.user_id} title={m.display_name} style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #7B1016, #5D0F14)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#F2F2F0', border: '2px solid #050505', marginLeft: i > 0 ? '-6px' : 0, overflow: 'hidden', zIndex: members.length - i }}>
+                {m.avatar_url ? <img src={m.avatar_url} alt={m.display_name || 'User avatar'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : m.display_name[0]?.toUpperCase()}
+              </div>
+            ))}
+            {members.length > 6 && <div style={{ fontSize: '11px', color: '#7E7E7E', marginLeft: '8px' }}>+{members.length - 6}</div>}
+          </div>
         </div>
       </div>
 
@@ -507,7 +527,7 @@ export function WatchPartyRoom({ party, initialMessages, initialMembers, current
         </div>
 
         {/* ── Chat Sidebar (right) ── */}
-        <div style={{ width: `${chatWidth}px`, flexShrink: 0, display: 'flex', flexDirection: 'column', background: 'rgba(8,8,8,0.98)', borderLeft: '1px solid rgba(255,255,255,0.06)', position: 'relative' }}>
+        <div className={`wp-chat-sidebar ${isMobileChatOpen ? 'open' : ''}`} style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', background: 'rgba(8,8,8,0.98)', borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
           
           {/* Floating emoji reactions */}
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 20 }}>
@@ -531,7 +551,12 @@ export function WatchPartyRoom({ party, initialMessages, initialMembers, current
 
           {/* Chat header */}
           <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#F2F2F0' }}>💬 Party Chat</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button className="wp-mobile-chat-close" onClick={() => setIsMobileChatOpen(false)} title="Close Chat">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#F2F2F0' }}>💬 Party Chat</span>
+            </div>
             <span style={{ fontSize: '11px', color: '#7E7E7E', background: 'rgba(255,255,255,0.04)', padding: '3px 10px', borderRadius: '20px' }}>{members.length} online</span>
           </div>
 
