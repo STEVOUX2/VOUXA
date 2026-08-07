@@ -46,13 +46,12 @@ function SearchResults() {
 
   const discover = async () => {
     setLoading(true);
-    const KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-    let url = `https://api.themoviedb.org/3/discover/movie?api_key=${KEY}&language=en-US&sort_by=popularity.desc&page=1`;
-    if (selectedGenre) url += `&with_genres=${selectedGenre}`;
-    if (selectedLanguage) url += `&with_original_language=${selectedLanguage}`;
-    if (yearFrom) url += `&primary_release_date.gte=${yearFrom}-01-01`;
-    if (yearTo) url += `&primary_release_date.lte=${yearTo}-12-31`;
-    if (minRating) url += `&vote_average.gte=${minRating}`;
+    let url = `/api/tmdb-discover?`;
+    if (selectedGenre) url += `genre=${selectedGenre}&`;
+    if (selectedLanguage) url += `language=${selectedLanguage}&`;
+    if (yearFrom) url += `yearFrom=${yearFrom}&`;
+    if (yearTo) url += `yearTo=${yearTo}&`;
+    if (minRating) url += `minRating=${minRating}&`;
     const res = await fetch(url);
     const data = await res.json();
     setResults((data.results || []).map((m: any) => ({ ...m, media_type: 'movie' })));
@@ -64,7 +63,7 @@ function SearchResults() {
     if (activeMode === 'search' && query) {
       const fetchResults = async () => {
         setLoading(true);
-        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=1`);
+        const res = await fetch(`/api/tmdb-search?query=${encodeURIComponent(query)}&page=1`);
         const data = await res.json();
         setResults((data.results || []).filter((i: any) => i.media_type === 'movie' || i.media_type === 'tv'));
         setLoading(false);

@@ -41,9 +41,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `https://api.themoviedb.org/3/search/multi?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=1`
-        );
+        const res = await fetch(`/api/tmdb-search?query=${encodeURIComponent(query)}&page=1`);
         const data = await res.json();
         // Filter out people, keep only movies and tv
         const filtered = (data.results || [])
